@@ -13,7 +13,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart'
     as platform;
 import 'package:http/http.dart';
-import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -110,6 +109,14 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
     String? hostedDomain,
     String? clientId,
   }) async {
+    // assert(clientId == null || clientId == _clientId,
+    //     'ClientID ($clientId) does not match the one used to register the plugin $_clientId.');
+    // assert(
+    //     !scopes.any((String scope) => scope.contains(' ')),
+    //     'OAuth 2.0 Scopes for Google APIs can\'t contain spaces.'
+    //     'Check https://developers.google.com/identity/protocols/googlescopes '
+    //     'for a list of valid OAuth 2.0 scopes.');
+
     if (scopes.isEmpty) {
       _scopes = const <String>['openid', 'email', 'profile'];
     } else {
