@@ -48,12 +48,12 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
   /// Your application should provide a [storage] implementation that can store
   /// the tokens is a secure, long-lived location that is accessible between
   /// different invocations of your application.
-  static Future<void> register(
-    String clientId,
+  static Future<void> register({
+    required String clientId,
     String? exchangeEndpoint,
     DataStorage? storage,
     UrlPresenter? presenter,
-  ) async {
+  }) async {
     presenter ??= (Uri uri) => launch(uri.toString());
 
     if (storage == null) {
