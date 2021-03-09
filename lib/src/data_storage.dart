@@ -7,9 +7,10 @@ part of '../google_sign_in_dartio.dart';
 /// Helper class for persisting tokens between sessions
 class DataStorage {
   /// Create an instance that will persist the values using [store].
-  const DataStorage._({@required Store store, @required String clientId})
-      : assert(store != null),
-        assert(clientId != null),
+  const DataStorage._(Store store, String clientId)
+      :
+        // assert(store != null),
+        // assert(clientId != null),
         _store = store,
         _clientId = clientId;
 
@@ -31,28 +32,28 @@ class DataStorage {
   /// In case there is no user logged in this value is the id of the last user
   /// that was logged in. This id can be used as a hint when the user tries to
   /// login again.
-  String get id => _store.get(_getKey(_kIdKey));
+  String? get id => _store.get(_getKey(_kIdKey));
 
   /// Saves the JSON Web Token (JWT) that contains digitally signed identity
   /// information about the user.
-  String get idToken => _store.get(_getKey(_kIdTokenKey));
+  String? get idToken => _store.get(_getKey(_kIdTokenKey));
 
-  set idToken(String value) => _setValue(_kIdTokenKey, value);
+  set idToken(String? value) => _setValue(_kIdTokenKey, value!);
 
   /// Saves the token that your application sends to authorize a Google API
   /// request.
-  String get accessToken => _store.get(_getKey(_kAccessTokenKey));
+  String? get accessToken => _store.get(_getKey(_kAccessTokenKey));
 
-  set accessToken(String value) => _setValue(_kAccessTokenKey, value);
+  set accessToken(String? value) => _setValue(_kAccessTokenKey, value!);
 
   /// Saves the remaining lifetime of the access token.
-  DateTime get expiresAt {
-    final String date = _store.get(_getKey(_kExpirationAtKey));
+  DateTime? get expiresAt {
+    final String? date = _store.get(_getKey(_kExpirationAtKey));
     return date != null ? DateTime.parse(date) : null;
   }
 
-  set expiresAt(DateTime value) {
-    _setValue(_kExpirationAtKey, value?.toIso8601String());
+  set expiresAt(DateTime? value) {
+    _setValue(_kExpirationAtKey, value!.toIso8601String());
   }
 
   /// Saves the token that you can use to obtain a new access token.
@@ -60,12 +61,12 @@ class DataStorage {
   /// Refresh tokens are present if you provided a
   /// [GoogleSignInDart._exchangeEndpoint] value and are valid until the
   /// user revokes access.
-  String get refreshToken => _store.get(_getKey(_kRefreshTokenKey));
+  String? get refreshToken => _store.get(_getKey(_kRefreshTokenKey));
 
-  set refreshToken(String value) => _setValue(_kRefreshTokenKey, value);
+  set refreshToken(String? value) => _setValue(_kRefreshTokenKey, value!);
 
   /// Retrieve the authentication data after sign in.
-  platform.GoogleSignInTokenData get tokenData {
+  platform.GoogleSignInTokenData? get tokenData {
     if (idToken != null || accessToken != null) {
       return platform.GoogleSignInTokenData(
           idToken: idToken, accessToken: accessToken);
@@ -74,16 +75,16 @@ class DataStorage {
     return null;
   }
 
-  set tokenData(platform.GoogleSignInTokenData data) {
-    idToken = data.idToken;
-    accessToken = data.accessToken;
+  set tokenData(platform.GoogleSignInTokenData? data) {
+    idToken = data!.idToken;
+    accessToken = data!.accessToken;
   }
 
   /// Save the scopes that we were granted access to in the last authorization.
   ///
   /// Returns an empty list if no authorization has take place yet.
   List<String> get scopes {
-    final String value = _store.get(_getKey(_kScopeKey));
+    final String? value = _store.get(_getKey(_kScopeKey));
     if (value == null || value.isEmpty) {
       return <String>[];
     }
@@ -136,12 +137,12 @@ class DataStorage {
   }
 
   /// Retrieve information about this signed in user based on the id_token.
-  platform.GoogleSignInUserData get userData {
+  platform.GoogleSignInUserData? get userData {
     if (idToken != null) {
       return platform.GoogleSignInUserData(
-        id: _store.get(_getKey(_kIdKey)),
+        id: _store.get(_getKey(_kIdKey))!,
         displayName: _store.get(_getKey(_kNameKey)),
-        email: _store.get(_getKey(_kEmailKey)),
+        email: _store.get(_getKey(_kEmailKey))!,
         photoUrl: _store.get(_getKey(_kPictureKey)),
         idToken: idToken,
       );
@@ -150,7 +151,7 @@ class DataStorage {
     return null;
   }
 
-  void _setValue(String key, String value) {
+  void _setValue(String key, String? value) {
     if (value == null) {
       _store.remove(_getKey(key));
     } else {
@@ -170,7 +171,7 @@ abstract class Store {
   void remove(String key);
 
   /// Get the value at specified [key] or nul if it doesn't exists.
-  String get(String key);
+  String? get(String key);
 
   /// Remove all the values store.
   void clearAll();
@@ -182,8 +183,8 @@ class _SharedPreferencesStore extends Store {
   final SharedPreferences _preferences;
 
   @override
-  String get(String key) {
-    return _preferences.get(key);
+  String? get(String key) {
+    return _preferences.get(key) as String?;
   }
 
   @override

@@ -30,29 +30,30 @@ typedef UrlPresenter = void Function(Uri uri);
 /// Implementation of the google_sign_in plugin in pure dart.
 class GoogleSignInDart extends platform.GoogleSignInPlatform {
   GoogleSignInDart._({
-    @required DataStorage storage,
-    @required String clientId,
-    @required UrlPresenter presenter,
-    String exchangeEndpoint,
-  })  : assert(storage != null),
-        assert(clientId != null),
-        assert(presenter != null),
+    required DataStorage storage,
+    required String clientId,
+    required UrlPresenter presenter,
+    String? exchangeEndpoint,
+  })  :
+        // assert(storage != null),
+        // assert(clientId != null),
+        // assert(presenter != null),
         _storage = storage,
         _clientId = clientId,
-        _presenter = presenter,
-        _exchangeEndpoint = exchangeEndpoint;
+        presenter = presenter,
+        _exchangeEndpoint = exchangeEndpoint!;
 
   /// Registers this implementation as default implementation for GoogleSignIn
   ///
   /// Your application should provide a [storage] implementation that can store
   /// the tokens is a secure, long-lived location that is accessible between
   /// different invocations of your application.
-  static Future<void> register({
-    @required String clientId,
-    String exchangeEndpoint,
-    DataStorage storage,
-    UrlPresenter presenter,
-  }) async {
+  static Future<void> register(
+    String clientId,
+    String? exchangeEndpoint,
+    DataStorage? storage,
+    UrlPresenter? presenter,
+  ) async {
     presenter ??= (Uri uri) => launch(uri.toString());
 
     if (storage == null) {
@@ -61,7 +62,7 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
           await SharedPreferences.getInstance();
       final _SharedPreferencesStore store =
           _SharedPreferencesStore(_preferences);
-      storage = DataStorage._(store: store, clientId: clientId);
+      storage = DataStorage._(store, clientId);
     }
 
     // If tokenExchangeEndpoint is removed in a session after the user was
@@ -72,53 +73,44 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
     }
 
     platform.GoogleSignInPlatform.instance = GoogleSignInDart._(
-      presenter: presenter,
       storage: storage,
-      exchangeEndpoint: exchangeEndpoint,
       clientId: clientId,
+      presenter: presenter,
+      exchangeEndpoint: exchangeEndpoint,
     );
   }
 
-  final String _exchangeEndpoint;
+  final String? _exchangeEndpoint;
   final String _clientId;
   final DataStorage _storage;
 
-  UrlPresenter _presenter;
-  List<String> _scopes;
-  String _hostedDomain;
+  UrlPresenter presenter;
+  List<String> _scopes = [];
+  String? _hostedDomain;
 
-  platform.GoogleSignInTokenData _tokenData;
-  String _refreshToken;
-  DateTime _expiresAt;
+  platform.GoogleSignInTokenData? _tokenData;
+  String? _refreshToken;
+  DateTime? _expiresAt;
 
-  /// Used by the sign in flow to allow opening of a browser in a platform
-  /// specific way.
-  ///
-  /// You can open the link in a in-app WebView or you can open it in the system
-  /// browser
-  UrlPresenter get presenter => _presenter;
+  // /// Used by the sign in flow to allow opening of a browser in a platform
+  // /// specific way.
+  // ///
+  // /// You can open the link in a in-app WebView or you can open it in the system
+  // /// browser
+  // UrlPresenter get presenter => _presenter;
 
-  set presenter(UrlPresenter value) {
-    assert(value != null);
-    _presenter = value;
-  }
+  // set presenter(UrlPresenter value) {
+  //   _presenter = value;
+  // }
 
   @override
   Future<void> init({
-    @required String hostedDomain,
     List<String> scopes = const <String>[],
-    platform.SignInOption signInOption = platform.SignInOption.standard,
-    String clientId,
+    SignInOption signInOption = SignInOption.standard,
+    String? hostedDomain,
+    String? clientId,
   }) async {
-    assert(clientId == null || clientId == _clientId,
-        'ClientID ($clientId) does not match the one used to register the plugin $_clientId.');
-    assert(
-        !scopes.any((String scope) => scope.contains(' ')),
-        'OAuth 2.0 Scopes for Google APIs can\'t contain spaces.'
-        'Check https://developers.google.com/identity/protocols/googlescopes '
-        'for a list of valid OAuth 2.0 scopes.');
-
-    if (scopes == null || scopes.isEmpty) {
+    if (scopes.isEmpty) {
       _scopes = const <String>['openid', 'email', 'profile'];
     } else {
       _scopes = scopes;
@@ -130,11 +122,11 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
   @override
   Future<platform.GoogleSignInUserData> signInSilently() async {
     if (_haveValidToken) {
-      return _storage.userData;
+      return _storage.userData!;
     } else if (_refreshToken != null) {
       try {
         await _doTokenRefresh();
-        return _storage.userData;
+        return _storage.userData!;
       } catch (e) {
         throw PlatformException(
             code: GoogleSignIn.kSignInFailedError, message: e.toString());
@@ -147,34 +139,34 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
   @override
   Future<platform.GoogleSignInUserData> signIn() async {
     if (_haveValidToken) {
-      final platform.GoogleSignInUserData userData = _storage.userData;
+      final platform.GoogleSignInUserData? userData = _storage.userData!;
       if (userData == null) {
         await _fetchUserProfile();
       }
-      return _storage.userData;
+      return _storage.userData!;
     } else {
       await _performSignIn(_scopes);
-      return _storage.userData;
+      return _storage.userData!;
     }
   }
 
   @override
   Future<platform.GoogleSignInTokenData> getTokens(
-      {String email, bool shouldRecoverAuth}) async {
+      {required String email, bool? shouldRecoverAuth = false}) async {
     if (_haveValidToken) {
-      return _tokenData;
+      return _tokenData!;
     } else if (_refreshToken != null) {
       // if refreshing the token fails, and shouldRecoverAuth is true, then we
       // will prompt the user to login again
       try {
         await _doTokenRefresh();
-        return _tokenData;
+        return _tokenData!;
       } catch (_) {}
     }
 
-    if (shouldRecoverAuth) {
+    if (shouldRecoverAuth != null && shouldRecoverAuth) {
       await _performSignIn(_scopes);
-      return _tokenData;
+      return _tokenData!;
     } else {
       throw PlatformException(
           code: GoogleSignInAccount.kUserRecoverableAuthError);
@@ -209,7 +201,7 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
   }
 
   @override
-  Future<void> clearAuthCache({String token}) async {
+  Future<void> clearAuthCache({String? token}) async {
     await _revokeToken();
     _storage.clear();
     _initFromStore();
@@ -234,7 +226,7 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
   Future<void> _revokeToken() async {
     if (_haveValidToken) {
       final Uri url = Uri.https('https://oauth2.googleapis.com',
-          '/revoke?token=${_tokenData.accessToken}');
+          '/revoke?token=${_tokenData!.accessToken}');
       await get(
         url,
         headers: <String, String>{
@@ -246,7 +238,7 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
 
   Future<void> _fetchUserProfile() async {
     if (_haveValidToken) {
-      final String token = _tokenData.accessToken;
+      final String token = _tokenData!.accessToken!;
       final Uri url =
           Uri.https('https://openidconnect.googleapis.com', '/v1/userinfo');
       final Response response = await get(
@@ -272,27 +264,27 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
   }
 
   bool get _haveValidToken {
-    return _expiresAt != null && DateTime.now().isBefore(_expiresAt);
+    return _expiresAt != null && DateTime.now().isBefore(_expiresAt!);
   }
 
   Future<void> _performSignIn(List<String> scopes) async {
     Future<Map<String, dynamic>> future;
     if (_exchangeEndpoint != null) {
       future = _codeExchangeSignIn(
-        scope: scopes.join(' '),
         clientId: _clientId,
-        hostedDomains: _hostedDomain,
+        exchangeEndpoint: _exchangeEndpoint!,
+        scope: scopes.join(' '),
         presenter: presenter,
-        exchangeEndpoint: _exchangeEndpoint,
+        hostedDomains: _hostedDomain,
         uid: _storage.id,
       );
     } else {
       future = _tokenSignIn(
-        scope: scopes.join(' '),
-        clientId: _clientId,
-        hostedDomains: _hostedDomain,
-        presenter: presenter,
-        uid: _storage.id,
+        _clientId,
+        scopes.join(' '),
+        presenter,
+        _hostedDomain,
+        _storage.id,
       );
     }
 
@@ -314,12 +306,12 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
     assert(_exchangeEndpoint != null);
     assert(_refreshToken != null);
 
-    final Uri url = Uri.https(_exchangeEndpoint, '');
+    final Uri url = Uri.https(_exchangeEndpoint!, '');
 
     final Response response = await post(
       url,
       body: json.encode(<String, String>{
-        'refreshToken': _refreshToken,
+        'refreshToken': _refreshToken!,
         'clientId': _clientId,
       }),
     );
@@ -331,13 +323,13 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
       _initFromStore();
       await _fetchUserProfile();
     } else {
-      return Future<Map<String, dynamic>>.error(response.body);
+      // return Future<Map<String, dynamic>>.error(response.body);
     }
   }
 
   void _initFromStore() {
-    _refreshToken = _storage.refreshToken;
-    _expiresAt = _storage.expiresAt;
-    _tokenData = _storage.tokenData;
+    _refreshToken = _storage.refreshToken!;
+    _expiresAt = _storage.expiresAt!;
+    _tokenData = _storage.tokenData!;
   }
 }
