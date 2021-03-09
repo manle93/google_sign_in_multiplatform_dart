@@ -76,8 +76,8 @@ class DataStorage {
   }
 
   set tokenData(platform.GoogleSignInTokenData? data) {
-    idToken = data!.idToken;
-    accessToken = data!.accessToken;
+    idToken = data!.idToken!;
+    accessToken = data!.accessToken!;
   }
 
   /// Save the scopes that we were granted access to in the last authorization.

@@ -41,7 +41,7 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
         _storage = storage,
         _clientId = clientId,
         presenter = presenter,
-        _exchangeEndpoint = exchangeEndpoint!;
+        _exchangeEndpoint = exchangeEndpoint;
 
   /// Registers this implementation as default implementation for GoogleSignIn
   ///
