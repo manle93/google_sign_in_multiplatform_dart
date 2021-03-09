@@ -118,7 +118,7 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
     //     'for a list of valid OAuth 2.0 scopes.');
 
     if (scopes.isEmpty) {
-      _scopes = const <String>['openid', 'email', 'profile'];
+      _scopes = const <String>['email', 'profile'];
     } else {
       _scopes = scopes;
     }
