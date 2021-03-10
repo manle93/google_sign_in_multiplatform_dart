@@ -143,9 +143,9 @@ class DataStorage {
   platform.GoogleSignInUserData? get userData {
     if (idToken != null) {
       return platform.GoogleSignInUserData(
-        id: _store.get(_getKey(_kIdKey))!,
+        id: _store.get(_getKey(_kIdKey)) ?? '',
         displayName: _store.get(_getKey(_kNameKey)),
-        email: _store.get(_getKey(_kEmailKey))!,
+        email: _store.get(_getKey(_kEmailKey)) ?? '',
         photoUrl: _store.get(_getKey(_kPictureKey)),
         idToken: idToken,
       );
