@@ -38,13 +38,13 @@ class DataStorage {
   /// information about the user.
   String? get idToken => _store.get(_getKey(_kIdTokenKey));
 
-  set idToken(String? value) => _setValue(_kIdTokenKey, value!);
+  set idToken(String? value) => _setValue(_kIdTokenKey, value);
 
   /// Saves the token that your application sends to authorize a Google API
   /// request.
   String? get accessToken => _store.get(_getKey(_kAccessTokenKey));
 
-  set accessToken(String? value) => _setValue(_kAccessTokenKey, value!);
+  set accessToken(String? value) => _setValue(_kAccessTokenKey, value);
 
   /// Saves the remaining lifetime of the access token.
   DateTime? get expiresAt {
@@ -53,7 +53,8 @@ class DataStorage {
   }
 
   set expiresAt(DateTime? value) {
-    _setValue(_kExpirationAtKey, value!.toIso8601String());
+    _setValue(
+        _kExpirationAtKey, value != null ? value.toIso8601String() : null);
   }
 
   /// Saves the token that you can use to obtain a new access token.
@@ -63,7 +64,7 @@ class DataStorage {
   /// user revokes access.
   String? get refreshToken => _store.get(_getKey(_kRefreshTokenKey));
 
-  set refreshToken(String? value) => _setValue(_kRefreshTokenKey, value!);
+  set refreshToken(String? value) => _setValue(_kRefreshTokenKey, value);
 
   /// Retrieve the authentication data after sign in.
   platform.GoogleSignInTokenData? get tokenData {
