@@ -247,7 +247,7 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
     if (_haveValidToken) {
       final String token = _tokenData!.accessToken!;
       final Uri url =
-          Uri.https('https://openidconnect.googleapis.com', '/v1/userinfo');
+          Uri.parse('https://openidconnect.googleapis.com/v1/userinfo');
       final Response response = await get(
         url,
         headers: <String, String>{
