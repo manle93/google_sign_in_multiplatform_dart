@@ -335,8 +335,8 @@ class GoogleSignInDart extends platform.GoogleSignInPlatform {
   }
 
   void _initFromStore() {
-    _refreshToken = _storage.refreshToken!;
-    _expiresAt = _storage.expiresAt!;
-    _tokenData = _storage.tokenData!;
+    _refreshToken = _storage.refreshToken;
+    _expiresAt = _storage.expiresAt;
+    _tokenData = _storage.tokenData;
   }
 }
